@@ -1,0 +1,9 @@
+keys:
+  apiKey: k_pcv4eo6i
+
+extern:
+  imdb:
+    baseUrl: https://imdb-api.com/API
+    movies:
+      top250:
+        url: /Top250Movies/${keys.apiKey}
