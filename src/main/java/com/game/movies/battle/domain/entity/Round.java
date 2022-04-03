@@ -3,6 +3,7 @@ package com.game.movies.battle.domain.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Data
@@ -11,10 +12,13 @@ public class Round extends BaseEntity {
     @ManyToOne
     private Player player;
 
-    private Integer number;
+    @OneToMany(mappedBy = "round", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SequenceMoviesRound> sequenceMoviesRounds;
 
-    private String idFirstMovie;
+    private Integer attempts;
 
-    private String idSecondMovie;
+    private Integer totalScore;
+
+    private boolean finished;
 
 }
