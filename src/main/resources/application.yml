@@ -1,3 +1,9 @@
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
 keys:
   apiKey: k_pcv4eo6i
 
