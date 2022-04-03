@@ -1,15 +1,15 @@
 package com.game.movies.battle.domain.resource;
 
+import com.game.movies.battle.domain.dto.RoundSaveResponseDto;
 import com.game.movies.battle.domain.dto.StartRoundDto;
 import com.game.movies.battle.domain.entity.Player;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.service.PlayerService;
 import com.game.movies.battle.domain.service.RoundService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("round")
@@ -21,11 +21,18 @@ public class RoundController {
     @Autowired
     private PlayerService playerService;
 
-    @PostMapping
-    public Round startRound(@RequestBody StartRoundDto startRoundDto) {
-        Player playerLoad = playerService.getPlayerId(startRoundDto.getPlayerId());
+    @Autowired
+    private ModelMapper modelMapper;
 
-        return roundService.startGame(playerLoad);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public RoundSaveResponseDto startRound(@RequestBody StartRoundDto startRoundDto) {
+        Player playerLoad = playerService.getPlayerId(startRoundDto.getPlayerId());
+        Round round = roundService.startGame(playerLoad);
+
+        RoundSaveResponseDto roundSaveResponseDto = modelMapper.map(round, RoundSaveResponseDto.class);
+
+        return roundSaveResponseDto;
     }
 
 }

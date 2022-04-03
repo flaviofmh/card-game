@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoundRepository extends JpaRepository<Round, Long> {
+
+    boolean existsByPlayerIdAndFinishedFalse(Long playerId);
+
 }
