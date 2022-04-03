@@ -13,3 +13,5 @@ extern:
     movies:
       top250:
         url: /Top250Movies/${keys.apiKey}
+      title:
+        url: /Title/${keys.apiKey}/{id}

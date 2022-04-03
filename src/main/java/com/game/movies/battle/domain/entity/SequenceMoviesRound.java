@@ -1,5 +1,6 @@
 package com.game.movies.battle.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -10,6 +11,7 @@ import javax.persistence.ManyToOne;
 public class SequenceMoviesRound extends BaseEntity {
 
     @ManyToOne
+    @JsonBackReference
     private Round round;
 
     private String idFirstMovie;
@@ -18,8 +20,8 @@ public class SequenceMoviesRound extends BaseEntity {
 
     private String answer;
 
-    private Integer answerScore;
+    private Boolean answerCorrect;
 
-    private boolean answerCorrect;
+    private Integer orderSequence;
 
 }
