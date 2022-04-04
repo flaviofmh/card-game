@@ -35,15 +35,13 @@ public class RoundController {
         return roundSaveResponseDto;
     }
 
-    @DeleteMapping
-    @RequestMapping("/{roundId}")
+    @DeleteMapping("/{roundId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void stopRound(@PathVariable Long roundId) {
         roundService.stop(roundId);
     }
 
-    @GetMapping
-    @RequestMapping("/{roundId}/details")
+    @GetMapping("/{roundId}")
     @ResponseStatus(HttpStatus.OK)
     public Round getGameById(@PathVariable Long roundId) {
         return roundService.getRoundById(roundId);
