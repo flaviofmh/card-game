@@ -4,6 +4,7 @@ import com.game.movies.battle.domain.dto.RoundSaveResponseDto;
 import com.game.movies.battle.domain.dto.StartRoundDto;
 import com.game.movies.battle.domain.entity.Player;
 import com.game.movies.battle.domain.entity.Round;
+import com.game.movies.battle.domain.resource.docs.RoundControllerDoc;
 import com.game.movies.battle.domain.service.PlayerService;
 import com.game.movies.battle.domain.service.RoundService;
 import org.modelmapper.ModelMapper;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("round")
-public class RoundController {
+public class RoundController implements RoundControllerDoc {
 
     @Autowired
     private RoundService roundService;

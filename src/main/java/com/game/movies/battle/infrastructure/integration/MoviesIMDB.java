@@ -21,4 +21,7 @@ public interface MoviesIMDB {
             produces = MediaType.APPLICATION_JSON_VALUE)
     MovieDetails getDetailMovieIMDB(@PathVariable("id") String id);
 
+    @RequestMapping(method = RequestMethod.GET, value = "${extern.imdb.movies.userratings.url}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    MovieDetails getRatingMovieIMDB(@PathVariable("id") String id);
 }

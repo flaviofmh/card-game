@@ -14,6 +14,7 @@ There is 2 users for to play the game. Each player is registred in database.
 
 There is a fews endpoints to iterate with the app. The app have a ordenation to play,
 endpoints.
+[Swagger API](http://localhost:8080/swagger-ui/index.htm)
 
 ### How to Play
 

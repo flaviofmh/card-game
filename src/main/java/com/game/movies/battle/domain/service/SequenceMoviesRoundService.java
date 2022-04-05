@@ -1,14 +1,18 @@
 package com.game.movies.battle.domain.service;
 
+import com.game.movies.battle.api.exceptionhandler.exception.EntityNotFoundException;
+import com.game.movies.battle.domain.dto.AnswerQuestionDto;
 import com.game.movies.battle.domain.dto.SequenceMoviesRoundDto;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
+import com.game.movies.battle.infrastructure.dto.MovieDetails;
 import com.game.movies.battle.infrastructure.dto.TopMovieDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +21,8 @@ import java.util.function.Predicate;
 
 @Service
 public class SequenceMoviesRoundService {
+
+    public static final String MESSAGE_QUESTION_ID = "Não há quiz para esse código %d";
 
     @Autowired
     private MovieService movieService;
@@ -95,5 +101,39 @@ public class SequenceMoviesRoundService {
 
     public void populateDetailsMovie(SequenceMoviesRoundDto sequenceMoviesRoundDto) {
         movieService.populateDetails(sequenceMoviesRoundDto);
+    }
+
+    public SequenceMoviesRound getSequenceMoviesRoundById(Round round, Long sequenceMoviesRoundId) {
+        SequenceMoviesRound sequenceMoviesRoundLoad = round.getSequenceMoviesRounds().stream()
+                .filter(sequenceMoviesRound -> sequenceMoviesRound.getId().equals(sequenceMoviesRoundId))
+                .findFirst().orElseThrow(() -> new EntityNotFoundException(
+                        String.format(MESSAGE_QUESTION_ID, sequenceMoviesRoundId)));
+
+        return sequenceMoviesRoundLoad;
+    }
+
+    public SequenceMoviesRound answerQuestion(final SequenceMoviesRound sequenceMoviesRoundCurrent,
+                                                 AnswerQuestionDto answerQuestionDto) {
+
+        MovieDetails firstMovieDetails = movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdFirstMovie());
+        MovieDetails SecondMovieDetails = movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdSecondMovie());
+
+        BigDecimal totalRatingFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRating().toString()));
+        BigDecimal totalRatingVotesFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRatingVotes().toString()));
+
+        BigDecimal totalFirst = totalRatingFirst.multiply(totalRatingVotesFirst);
+
+        BigDecimal totalRatingSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getTotalRating().toString()));
+        BigDecimal totalRatingVotesSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getTotalRatingVotes().toString()));
+
+        BigDecimal totalSecond = totalRatingSecond.multiply(totalRatingVotesSecond);
+
+        if (answerQuestionDto.getMovieId().equals(firstMovieDetails.getImDbId())) {
+            sequenceMoviesRoundCurrent.setAnswerCorrect(totalFirst.compareTo(totalSecond) == 1);
+        } else {
+            sequenceMoviesRoundCurrent.setAnswerCorrect(false);
+        }
+        sequenceMoviesRoundCurrent.setAnswer(answerQuestionDto.getMovieId());
+        return sequenceMoviesRoundCurrent;
     }
 }
