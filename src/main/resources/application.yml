@@ -3,6 +3,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
 
 keys:
   apiKey: k_pcv4eo6i
@@ -15,3 +18,5 @@ extern:
         url: /Top250Movies/${keys.apiKey}
       title:
         url: /Title/${keys.apiKey}/{id}
+      rating:
+        url: /UserRatings/${keys.apiKey}/{id}

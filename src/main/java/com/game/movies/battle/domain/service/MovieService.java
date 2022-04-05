@@ -23,6 +23,10 @@ public class MovieService {
         return topMovies.getItems();
     }
 
+    public MovieDetails loadRatingMovie(String movieId) {
+        return moviesIMDB.getRatingMovieIMDB(movieId);
+    }
+
     public void populateDetails(final SequenceMoviesRoundDto sequenceMoviesRoundDto) {
         {
             MovieDetails detailMovieIMDB = moviesIMDB.getDetailMovieIMDB(sequenceMoviesRoundDto.getIdFirstMovie());
