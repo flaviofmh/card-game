@@ -8,15 +8,8 @@ spring:
       matching-strategy: ant-path-matcher
 
 keys:
-  apiKey: k_pcv4eo6i
+  apiKey: b9d5c427
 
 extern:
   imdb:
-    baseUrl: https://imdb-api.com/API
-    movies:
-      top250:
-        url: /Top250Movies/${keys.apiKey}
-      title:
-        url: /Title/${keys.apiKey}/{id}
-      rating:
-        url: /UserRatings/${keys.apiKey}/{id}
+    baseUrl: https://www.omdbapi.com/?apikey=b9d5c427

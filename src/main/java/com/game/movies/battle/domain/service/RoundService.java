@@ -20,7 +20,7 @@ public class RoundService {
     @Autowired
     private RoundRepository roundRepository;
 
-    public Round startGame(Player player) {
+    public Round startGame(Player player, String type, String baseTitle) {
 
         boolean exists = roundRepository.existsByPlayerIdAndFinishedFalse(player.getId());
 
@@ -34,6 +34,8 @@ public class RoundService {
         round.setFinished(false);
         round.setAttempts(0);
         round.setTotalScore(0);
+        round.setType(type.toLowerCase());
+        round.setTitle(baseTitle.toLowerCase());
 
         return roundRepository.save(round);
     }

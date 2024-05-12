@@ -1,9 +1,8 @@
 package com.game.movies.battle.domain.service;
 
-import com.game.movies.battle.domain.dto.SequenceMoviesRoundDto;
-import com.game.movies.battle.infrastructure.dto.MovieDetails;
-import com.game.movies.battle.infrastructure.dto.MovieItem;
-import com.game.movies.battle.infrastructure.dto.TopMovieDto;
+import com.game.movies.battle.infrastructure.dto.MovieItemList;
+import com.game.movies.battle.infrastructure.dto.ImodbMovieDto;
+import com.game.movies.battle.infrastructure.dto.ParamsFilter;
 import com.game.movies.battle.infrastructure.integration.MoviesIMDB;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,23 +17,9 @@ public class MovieService {
     @Autowired
     private MoviesIMDB moviesIMDB;
 
-    public List<TopMovieDto> getTopMovies() {
-        MovieItem topMovies = moviesIMDB.getTopMoviesIMDB();
-        return topMovies.getItems();
-    }
-
-    public MovieDetails loadRatingMovie(String movieId) {
-        return moviesIMDB.getRatingMovieIMDB(movieId);
-    }
-
-    public void populateDetails(final SequenceMoviesRoundDto sequenceMoviesRoundDto) {
-        {
-            MovieDetails detailMovieIMDB = moviesIMDB.getDetailMovieIMDB(sequenceMoviesRoundDto.getIdFirstMovie());
-            sequenceMoviesRoundDto.setTitleFirstMovie(detailMovieIMDB.getFullTitle());
-        }
-        {
-            MovieDetails detailMovieIMDB = moviesIMDB.getDetailMovieIMDB(sequenceMoviesRoundDto.getIdSecondMovie());
-            sequenceMoviesRoundDto.setTitleSecondMovie(detailMovieIMDB.getFullTitle());
-        }
+    public List<ImodbMovieDto> getMoviesByTitleAndType(String title, String type) {
+        var params = ParamsFilter.builder().type(type).s(title).build();
+        MovieItemList topMovies = moviesIMDB.getMoviesByParameter(params);
+        return topMovies.getSearch();
     }
 }

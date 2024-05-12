@@ -20,7 +20,7 @@ public class SequenceMoviesRound extends BaseEntity {
 
     private String answer;
 
-    private Boolean answerCorrect;
+    private Integer score;
 
     private Integer orderSequence;
 
