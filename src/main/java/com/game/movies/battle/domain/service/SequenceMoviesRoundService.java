@@ -7,7 +7,7 @@ import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
 import com.game.movies.battle.infrastructure.dto.MovieDetails;
-import com.game.movies.battle.infrastructure.dto.TopMovieDto;
+import com.game.movies.battle.infrastructure.dto.ImodbMovieDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -44,7 +44,7 @@ public class SequenceMoviesRoundService {
 
     private SequenceMoviesRound createNewSequenceMovies(final Round currentRound) {
 
-        final List<TopMovieDto> topMovies = movieService.getTopMovies();
+        final List<ImodbMovieDto> topMovies = null;//movieService.getMoviesByTitleAndType();
 
         SequenceMoviesRound nextQuestionQuiz = createNextQuestionQuiz(currentRound, topMovies);
 
@@ -52,26 +52,26 @@ public class SequenceMoviesRoundService {
         return currentRound.getSequenceMoviesRounds().get(currentRound.getSequenceMoviesRounds().size()-1);
     }
 
-    private SequenceMoviesRound createNextQuestionQuiz(Round currentRound, List<TopMovieDto> topMovies) {
+    private SequenceMoviesRound createNextQuestionQuiz(Round currentRound, List<ImodbMovieDto> topMovies) {
         Random rand = new Random();
         SequenceMoviesRound sequenceMoviesRound = null;
         for (int i = 0; i < topMovies.size(); i++) {
 
             int randomIndex = rand.nextInt(topMovies.size());
-            TopMovieDto firstMovie = topMovies.get(randomIndex);
+            ImodbMovieDto firstMovie = topMovies.get(randomIndex);
 
             randomIndex = rand.nextInt(topMovies.size());
-            TopMovieDto secondMovie = topMovies.get(randomIndex);
+            ImodbMovieDto secondMovie = topMovies.get(randomIndex);
 
-            if (checkElementDuplicated(currentRound.getSequenceMoviesRounds(), firstMovie.getId(), secondMovie.getId())) {
+            if (checkElementDuplicated(currentRound.getSequenceMoviesRounds(), firstMovie.getImdbID(), secondMovie.getImdbID())) {
                 topMovies.remove(randomIndex);
                 i = 0;
                 continue;
             }
 
             sequenceMoviesRound = new SequenceMoviesRound();
-            sequenceMoviesRound.setIdFirstMovie(firstMovie.getId());
-            sequenceMoviesRound.setIdSecondMovie(secondMovie.getId());
+            sequenceMoviesRound.setIdFirstMovie(firstMovie.getImdbID());
+            sequenceMoviesRound.setIdSecondMovie(secondMovie.getImdbID());
             sequenceMoviesRound.setRound(currentRound);
             if (currentRound.getSequenceMoviesRounds() == null) {
                 currentRound.setSequenceMoviesRounds(new ArrayList<>());
@@ -100,7 +100,7 @@ public class SequenceMoviesRoundService {
     }
 
     public void populateDetailsMovie(SequenceMoviesRoundDto sequenceMoviesRoundDto) {
-        movieService.populateDetails(sequenceMoviesRoundDto);
+        //movieService.populateDetails(sequenceMoviesRoundDto);
     }
 
     public SequenceMoviesRound getSequenceMoviesRoundById(Round round, Long sequenceMoviesRoundId) {
@@ -115,8 +115,8 @@ public class SequenceMoviesRoundService {
     public SequenceMoviesRound answerQuestion(final SequenceMoviesRound sequenceMoviesRoundCurrent,
                                                  AnswerQuestionDto answerQuestionDto) {
 
-        MovieDetails firstMovieDetails = movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdFirstMovie());
-        MovieDetails SecondMovieDetails = movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdSecondMovie());
+        MovieDetails firstMovieDetails = null;//movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdFirstMovie());
+        MovieDetails SecondMovieDetails = null;//movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdSecondMovie());
 
         BigDecimal totalRatingFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRating().toString()));
         BigDecimal totalRatingVotesFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRatingVotes().toString()));

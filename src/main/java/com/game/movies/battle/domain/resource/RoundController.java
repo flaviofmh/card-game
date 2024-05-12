@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,9 +30,9 @@ public class RoundController implements RoundControllerDoc {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundSaveResponseDto startRound(@RequestBody StartRoundDto startRoundDto) {
+    public RoundSaveResponseDto startRound(@RequestBody @Valid StartRoundDto startRoundDto) {
         Player playerLoad = playerService.getPlayerId(startRoundDto.getPlayerId());
-        Round round = roundService.startGame(playerLoad);
+        Round round = roundService.startGame(playerLoad, startRoundDto.getType(), startRoundDto.getBaseTitle());
 
         RoundSaveResponseDto roundSaveResponseDto = modelMapper.map(round, RoundSaveResponseDto.class);
 
