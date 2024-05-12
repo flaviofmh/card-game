@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("round")
 public class RoundController implements RoundControllerDoc {
@@ -46,6 +48,12 @@ public class RoundController implements RoundControllerDoc {
     @ResponseStatus(HttpStatus.OK)
     public Round getGameById(@PathVariable Long roundId) {
         return roundService.getRoundById(roundId);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Round> getAll() {
+        return roundService.getAll();
     }
 
 }

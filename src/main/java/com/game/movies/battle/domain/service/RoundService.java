@@ -8,6 +8,7 @@ import com.game.movies.battle.domain.repository.RoundRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -50,5 +51,9 @@ public class RoundService {
                 String.format(MESSAGE_ROUND_ID, roundId)));
 
         return round;
+    }
+
+    public List<Round> getAll() {
+        return roundRepository.findAll();
     }
 }
