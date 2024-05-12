@@ -14,6 +14,5 @@ public class RoundSaveResponseDto implements Serializable {
     private PlayerResponseDto player;
     private List<SequenceMoviesRound> sequenceMoviesRounds;
     private Integer attempts;
-    private Integer totalScore;
 
 }

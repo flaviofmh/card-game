@@ -1,24 +1,24 @@
 package com.game.movies.battle.domain.service;
 
+import com.game.movies.battle.api.exceptionhandler.exception.AnswerDoesntMatch;
 import com.game.movies.battle.api.exceptionhandler.exception.EntityNotFoundException;
 import com.game.movies.battle.domain.dto.AnswerQuestionDto;
 import com.game.movies.battle.domain.dto.SequenceMoviesRoundDto;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
-import com.game.movies.battle.infrastructure.dto.MovieDetails;
 import com.game.movies.battle.infrastructure.dto.ImodbMovieDto;
+import com.game.movies.battle.infrastructure.dto.MovieDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
 
+@Transactional
 @Service
 public class SequenceMoviesRoundService {
 
@@ -33,7 +33,7 @@ public class SequenceMoviesRoundService {
     public SequenceMoviesRound currentQuiz(final Round currentRound) {
         if (!CollectionUtils.isEmpty(currentRound.getSequenceMoviesRounds())) {
             Optional<SequenceMoviesRound> sequenceMoviesRoundCurrent = currentRound.getSequenceMoviesRounds().stream().filter(sequenceMoviesRound ->
-                    sequenceMoviesRound.getAnswer() == null).findFirst();
+                    sequenceMoviesRound.isPendingAnswer()).findFirst();
 
             if (sequenceMoviesRoundCurrent.isPresent()) {
                 return sequenceMoviesRoundCurrent.get();
@@ -44,27 +44,28 @@ public class SequenceMoviesRoundService {
 
     private SequenceMoviesRound createNewSequenceMovies(final Round currentRound) {
 
-        final List<ImodbMovieDto> topMovies = null;//movieService.getMoviesByTitleAndType();
+        final List<ImodbMovieDto> topMovies = movieService.getMoviesByTitleAndType(currentRound.getTitle(), currentRound.getType());
 
-        SequenceMoviesRound nextQuestionQuiz = createNextQuestionQuiz(currentRound, topMovies);
+        createNextQuestionQuiz(currentRound, topMovies);
 
-        roundRepository.saveAndFlush(currentRound);
-        return currentRound.getSequenceMoviesRounds().get(currentRound.getSequenceMoviesRounds().size()-1);
+        roundRepository.save(currentRound);
+        var currentQuiz = currentRound.getSequenceMoviesRounds().stream().filter(sequenceMoviesRound -> sequenceMoviesRound.isPendingAnswer()).findFirst();
+        return currentQuiz.get();
     }
 
-    private SequenceMoviesRound createNextQuestionQuiz(Round currentRound, List<ImodbMovieDto> topMovies) {
+    private void createNextQuestionQuiz(Round currentRound, List<ImodbMovieDto> topMovies) {
         Random rand = new Random();
         SequenceMoviesRound sequenceMoviesRound = null;
         for (int i = 0; i < topMovies.size(); i++) {
 
-            int randomIndex = rand.nextInt(topMovies.size());
-            ImodbMovieDto firstMovie = topMovies.get(randomIndex);
+            Collections.shuffle(topMovies);
+            ImodbMovieDto firstMovie = topMovies.get(i);
 
-            randomIndex = rand.nextInt(topMovies.size());
-            ImodbMovieDto secondMovie = topMovies.get(randomIndex);
+            ImodbMovieDto secondMovie = topMovies.get(i+1);
 
             if (checkElementDuplicated(currentRound.getSequenceMoviesRounds(), firstMovie.getImdbID(), secondMovie.getImdbID())) {
-                topMovies.remove(randomIndex);
+                topMovies.remove(i);
+                topMovies.remove(i+1);
                 i = 0;
                 continue;
             }
@@ -72,14 +73,11 @@ public class SequenceMoviesRoundService {
             sequenceMoviesRound = new SequenceMoviesRound();
             sequenceMoviesRound.setIdFirstMovie(firstMovie.getImdbID());
             sequenceMoviesRound.setIdSecondMovie(secondMovie.getImdbID());
-            sequenceMoviesRound.setRound(currentRound);
-            if (currentRound.getSequenceMoviesRounds() == null) {
-                currentRound.setSequenceMoviesRounds(new ArrayList<>());
-            }
+            sequenceMoviesRound.setScore(0);
+            sequenceMoviesRound.setOrderSequence(currentRound.getSequenceMoviesRounds().size()+1);
             currentRound.getSequenceMoviesRounds().add(sequenceMoviesRound);
             break;
         }
-        return sequenceMoviesRound;
     }
 
     private boolean checkElementDuplicated(List<SequenceMoviesRound> sequenceMoviesRounds,
@@ -96,16 +94,17 @@ public class SequenceMoviesRoundService {
         Optional<SequenceMoviesRound> first = sequenceMoviesRounds.stream().filter(sequenceMoviesRoundPredicateCompare).findFirst();
         Optional<SequenceMoviesRound> second = sequenceMoviesRounds.stream().filter(sequenceMoviesRoundPredicateCompareInverse).findFirst();
 
-        return first.isPresent() && second.isPresent();
+        return first.isPresent() || second.isPresent();
     }
 
-    public void populateDetailsMovie(SequenceMoviesRoundDto sequenceMoviesRoundDto) {
-        //movieService.populateDetails(sequenceMoviesRoundDto);
-    }
+    public SequenceMoviesRound getSequenceMoviesRoundById(final Round round, Long sequenceMoviesRoundId) {
 
-    public SequenceMoviesRound getSequenceMoviesRoundById(Round round, Long sequenceMoviesRoundId) {
-        SequenceMoviesRound sequenceMoviesRoundLoad = round.getSequenceMoviesRounds().stream()
-                .filter(sequenceMoviesRound -> sequenceMoviesRound.getId().equals(sequenceMoviesRoundId))
+        Predicate<SequenceMoviesRound> currentQuiz = sequenceMoviesRound ->
+                sequenceMoviesRound.getId().equals(sequenceMoviesRoundId)
+                        && sequenceMoviesRound.isPendingAnswer();
+
+        final SequenceMoviesRound sequenceMoviesRoundLoad = round.getSequenceMoviesRounds().stream()
+                .filter(currentQuiz)
                 .findFirst().orElseThrow(() -> new EntityNotFoundException(
                         String.format(MESSAGE_QUESTION_ID, sequenceMoviesRoundId)));
 
@@ -115,25 +114,47 @@ public class SequenceMoviesRoundService {
     public SequenceMoviesRound answerQuestion(final SequenceMoviesRound sequenceMoviesRoundCurrent,
                                                  AnswerQuestionDto answerQuestionDto) {
 
-        MovieDetails firstMovieDetails = null;//movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdFirstMovie());
-        MovieDetails SecondMovieDetails = null;//movieService.loadRatingMovie(sequenceMoviesRoundCurrent.getIdSecondMovie());
+        MovieDetails firstMovieDetails = movieService.getMoviesByTitleAndType(sequenceMoviesRoundCurrent.getIdFirstMovie());
+        MovieDetails SecondMovieDetails = movieService.getMoviesByTitleAndType(sequenceMoviesRoundCurrent.getIdSecondMovie());
 
-        BigDecimal totalRatingFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRating().toString()));
-        BigDecimal totalRatingVotesFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getTotalRatingVotes().toString()));
+        BigDecimal totalRatingFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getRating()));
+        BigDecimal totalRatingVotesFirst = BigDecimal.valueOf(Double.valueOf(firstMovieDetails.getVotes().replaceAll(",", "")));
 
         BigDecimal totalFirst = totalRatingFirst.multiply(totalRatingVotesFirst);
 
-        BigDecimal totalRatingSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getTotalRating().toString()));
-        BigDecimal totalRatingVotesSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getTotalRatingVotes().toString()));
+        BigDecimal totalRatingSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getRating().toString()));
+        BigDecimal totalRatingVotesSecond = BigDecimal.valueOf(Double.valueOf(SecondMovieDetails.getVotes().replaceAll(",", "")));
 
         BigDecimal totalSecond = totalRatingSecond.multiply(totalRatingVotesSecond);
 
-        if (answerQuestionDto.getMovieId().equals(firstMovieDetails.getImDbId())) {
-            sequenceMoviesRoundCurrent.setAnswerCorrect(totalFirst.compareTo(totalSecond) == 1);
-        } else {
-            sequenceMoviesRoundCurrent.setAnswerCorrect(false);
+        if (!answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdFirstMovie()) &&
+                !answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdSecondMovie())) {
+            throw new AnswerDoesntMatch(String.format("A resposta fornecida é invalida para as opcoes apresentadas"));
         }
+
+        if (answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdFirstMovie())) {
+            if (totalFirst.compareTo(totalSecond) == 1) {
+                sequenceMoviesRoundCurrent.setScore(sequenceMoviesRoundCurrent.getScore()+1);
+                sequenceMoviesRoundCurrent.setPendingAnswer(false);
+            }
+        }
+
+        if (answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdSecondMovie())) {
+            if (totalSecond.compareTo(totalFirst) == 1) {
+                sequenceMoviesRoundCurrent.setScore(sequenceMoviesRoundCurrent.getScore()+1);
+                sequenceMoviesRoundCurrent.setPendingAnswer(false);
+            }
+        }
+
         sequenceMoviesRoundCurrent.setAnswer(answerQuestionDto.getMovieId());
         return sequenceMoviesRoundCurrent;
+    }
+
+    public void setNameMovies(SequenceMoviesRoundDto sequenceMoviesRoundDto) {
+        MovieDetails firstMovieDetails = movieService.getMoviesByTitleAndType(sequenceMoviesRoundDto.getIdFirstMovie());
+        MovieDetails SecondMovieDetails = movieService.getMoviesByTitleAndType(sequenceMoviesRoundDto.getIdSecondMovie());
+
+        sequenceMoviesRoundDto.setTitleFirstMovie(firstMovieDetails.getFullTitle());
+        sequenceMoviesRoundDto.setTitleSecondMovie(SecondMovieDetails.getFullTitle());
     }
 }

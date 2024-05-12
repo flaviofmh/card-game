@@ -13,7 +13,9 @@ public enum ErrorType {
     ERRO_NEGOCIO("/erro-negocio", "Violação de regra de negócio"),
     DADOS_INVALIDOS("/dados-invalidos", "Dados inválidos"),
     START_GAME("/round", "Erro Start Game"),
-    ENTIDADE_NAO_ENCONTRADA("/entidade-nao-encontrada", "Entidade não encontrada");
+    ENTIDADE_NAO_ENCONTRADA("/entidade-nao-encontrada", "Entidade não encontrada"),
+    RESPOSTA_INVALIDA("/resposta-invalida", "A resposta fornecida não condiz com as opções fornecidas"),
+    LIMITE_RESPOSTAS_EXCEDIDA("/limite-respostas", "Limite de respostas errada para esse round excedido");
 
     private String title;
     private String uri;

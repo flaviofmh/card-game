@@ -31,7 +31,8 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
         SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundService.currentQuiz(roundById);
 
         final SequenceMoviesRoundDto sequenceMoviesRoundDto = modelMapper.map(sequenceMoviesRound, SequenceMoviesRoundDto.class);
-        sequenceMoviesRoundService.populateDetailsMovie(sequenceMoviesRoundDto);
+
+        sequenceMoviesRoundService.setNameMovies(sequenceMoviesRoundDto);
 
         return sequenceMoviesRoundDto;
     }
@@ -40,11 +41,15 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
     public SequenceMoviesRound sendAnswer(@PathVariable Long roundId, @PathVariable Long questionId,
                                              @RequestBody AnswerQuestionDto answerQuestionDto) {
 
-        Round currentRound = roundService.getRoundById(roundId);
-        SequenceMoviesRound sequenceMoviesRoundCurrent =
+        final Round currentRound = roundService.getRoundById(roundId);
+        roundService.roundHasFinished(currentRound);
+        final SequenceMoviesRound sequenceMoviesRoundCurrent =
                 sequenceMoviesRoundService.getSequenceMoviesRoundById(currentRound, questionId);
 
-        return sequenceMoviesRoundService.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
+        var response = sequenceMoviesRoundService.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
+        roundService.updateAttempts(currentRound, sequenceMoviesRoundCurrent.getId());
+
+        return response;
     }
 
 }
