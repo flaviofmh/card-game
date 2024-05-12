@@ -26,9 +26,10 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
 
     @GetMapping
     public SequenceMoviesRoundDto currentQuiz(@PathVariable Long roundId) {
-        final Round roundById = roundService.getRoundById(roundId);
+        final Round round = roundService.getRoundById(roundId);
+        roundService.roundHasFinished(round);
 
-        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundService.currentQuiz(roundById);
+        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundService.currentQuiz(round);
 
         final SequenceMoviesRoundDto sequenceMoviesRoundDto = modelMapper.map(sequenceMoviesRound, SequenceMoviesRoundDto.class);
 
@@ -41,8 +42,7 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
     public SequenceMoviesRound sendAnswer(@PathVariable Long roundId, @PathVariable Long questionId,
                                              @RequestBody AnswerQuestionDto answerQuestionDto) {
 
-        final Round currentRound = roundService.getRoundById(roundId);
-        roundService.roundHasFinished(currentRound);
+        final Round currentRound = roundService.getRoundByIdAndPlayerId(roundId, answerQuestionDto.getPlayerId());
         final SequenceMoviesRound sequenceMoviesRoundCurrent =
                 sequenceMoviesRoundService.getSequenceMoviesRoundById(currentRound, questionId);
 

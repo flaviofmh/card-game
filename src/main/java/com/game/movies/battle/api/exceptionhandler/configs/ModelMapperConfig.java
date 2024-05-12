@@ -1,5 +1,6 @@
 package com.game.movies.battle.api.exceptionhandler.configs;
 
+import com.game.movies.battle.domain.converters.RoundConverter;
 import feign.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,9 @@ public class ModelMapperConfig {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        var modelMapper = new ModelMapper();
+        modelMapper.addConverter(new RoundConverter());
+        return modelMapper;
     }
 
     @Bean

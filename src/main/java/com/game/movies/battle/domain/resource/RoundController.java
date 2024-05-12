@@ -1,5 +1,7 @@
 package com.game.movies.battle.domain.resource;
 
+import com.game.movies.battle.domain.converters.RoundConverter;
+import com.game.movies.battle.domain.dto.RankingResponse;
 import com.game.movies.battle.domain.dto.RoundSaveResponseDto;
 import com.game.movies.battle.domain.dto.StartRoundDto;
 import com.game.movies.battle.domain.entity.Player;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("round")
@@ -61,6 +64,16 @@ public class RoundController implements RoundControllerDoc {
     @ResponseStatus(HttpStatus.OK)
     public List<Round> getAll() {
         return roundService.getAll();
+    }
+
+    @GetMapping("/ranking")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RankingResponse> getRankingUsersOrdered() {
+        var ranking = roundService.getAllRoundsOrderedByScore();
+        var rankingResponse = ranking.stream()
+                .map(source -> modelMapper.map(source, RankingResponse.class))
+                .collect(Collectors.toList());
+        return rankingResponse;
     }
 
 }

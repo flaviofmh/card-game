@@ -135,18 +135,17 @@ public class SequenceMoviesRoundService {
         if (answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdFirstMovie())) {
             if (totalFirst.compareTo(totalSecond) == 1) {
                 sequenceMoviesRoundCurrent.setScore(sequenceMoviesRoundCurrent.getScore()+1);
-                sequenceMoviesRoundCurrent.setPendingAnswer(false);
             }
         }
 
         if (answerQuestionDto.getMovieId().equals(sequenceMoviesRoundCurrent.getIdSecondMovie())) {
             if (totalSecond.compareTo(totalFirst) == 1) {
                 sequenceMoviesRoundCurrent.setScore(sequenceMoviesRoundCurrent.getScore()+1);
-                sequenceMoviesRoundCurrent.setPendingAnswer(false);
             }
         }
 
         sequenceMoviesRoundCurrent.setAnswer(answerQuestionDto.getMovieId());
+        sequenceMoviesRoundCurrent.setPendingAnswer(false);
         return sequenceMoviesRoundCurrent;
     }
 

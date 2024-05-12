@@ -18,6 +18,8 @@ public class Round extends BaseEntity {
 
     private Integer attempts;
 
+    private Double totalScore;
+
     private boolean finished;
 
     private String type;
