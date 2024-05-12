@@ -5,6 +5,7 @@ import com.game.movies.battle.api.exceptionhandler.exception.ExistsGameException
 import com.game.movies.battle.api.exceptionhandler.exception.RoundHasFinished;
 import com.game.movies.battle.domain.entity.Player;
 import com.game.movies.battle.domain.entity.Round;
+import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,8 +46,22 @@ public class RoundService {
         Round roundCurrent = roundRepository.findByIdAndFinishedFalse(roundId).orElseThrow(() -> new ExistsGameException(
                 String.format(MESSAGE_ROUND_ID, roundId)));
 
+        var totalScore = calcTotalScore(roundCurrent);
+
         roundCurrent.setFinished(true);
+        roundCurrent.setTotalScore(totalScore);
         roundRepository.save(roundCurrent);
+    }
+
+    private Double calcTotalScore(Round roundCurrent) {
+
+        var totalQuestions = (double) roundCurrent.getSequenceMoviesRounds().size();
+        var totalRight = roundCurrent.getSequenceMoviesRounds().stream().mapToDouble(SequenceMoviesRound::getScore).sum();
+
+        var percentRight = (totalRight / totalQuestions) * 100;
+        var totalFinal = percentRight * totalRight;
+
+        return totalFinal;
     }
 
     public Round getRoundById(Long roundId) {
@@ -56,17 +71,28 @@ public class RoundService {
         return round;
     }
 
+    public Round getRoundByIdAndPlayerId(Long roundId, Long playerId) {
+        Round round = roundRepository.findByIdAndPlayerId(roundId, playerId).orElseThrow(() -> new EntityNotFoundException(
+                String.format(MESSAGE_ROUND_ID, roundId)));
+
+        return round;
+    }
+
     public List<Round> getAll() {
         return roundRepository.findAll();
+    }
+
+    public List<Round> getAllRoundsOrderedByScore() {
+        return roundRepository.findByOrderByTotalScoreDesc();
     }
 
     public void updateAttempts(Round currentRound, Long sequenceMoviesRoundId) {
         var sequenceMoviesRound = currentRound.getSequenceMoviesRounds().stream().filter(movies -> movies.getId().equals(sequenceMoviesRoundId)).findFirst();
         if (sequenceMoviesRound.isPresent()) {
-            if (sequenceMoviesRound.get().isPendingAnswer()) {
+            if (sequenceMoviesRound.get().getScore().equals(0)) {
                 currentRound.setAttempts(currentRound.getAttempts()+1);
                 if (currentRound.getAttempts().equals(3)) {
-                    currentRound.setFinished(true);
+                    stop(currentRound.getId());
                 }
             }
         }
