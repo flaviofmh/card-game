@@ -1,7 +1,9 @@
 package com.game.movies.battle.api.exceptionhandler;
 
+import com.game.movies.battle.api.exceptionhandler.exception.AnswerDoesntMatch;
 import com.game.movies.battle.api.exceptionhandler.exception.EntityNotFoundException;
 import com.game.movies.battle.api.exceptionhandler.exception.ExistsGameException;
+import com.game.movies.battle.api.exceptionhandler.exception.RoundHasFinished;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -80,6 +82,32 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorType problemType = ErrorType.START_GAME;
+        String detail = ex.getMessage();
+
+        Error problem = createProblemBuilder(status, problemType, detail).build();
+
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
+    }
+
+    @ExceptionHandler(AnswerDoesntMatch.class)
+    public ResponseEntity<?> handleInvalidAnswerException(
+            AnswerDoesntMatch ex, WebRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorType problemType = ErrorType.RESPOSTA_INVALIDA;
+        String detail = ex.getMessage();
+
+        Error problem = createProblemBuilder(status, problemType, detail).build();
+
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
+    }
+
+    @ExceptionHandler(RoundHasFinished.class)
+    public ResponseEntity<?> handleInvalidAnswerException(
+            RoundHasFinished ex, WebRequest request) {
+
+        HttpStatus status = HttpStatus.TOO_MANY_REQUESTS;
+        ErrorType problemType = ErrorType.LIMITE_RESPOSTAS_EXCEDIDA;
         String detail = ex.getMessage();
 
         Error problem = createProblemBuilder(status, problemType, detail).build();

@@ -1,9 +1,9 @@
 package com.game.movies.battle.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,9 +13,8 @@ public class Round extends BaseEntity {
     @ManyToOne
     private Player player;
 
-    @OneToMany(mappedBy = "round", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
-    private List<SequenceMoviesRound> sequenceMoviesRounds;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SequenceMoviesRound> sequenceMoviesRounds = new ArrayList<>();
 
     private Integer attempts;
 

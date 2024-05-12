@@ -7,6 +7,7 @@ import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.resource.docs.RoundControllerDoc;
 import com.game.movies.battle.domain.service.PlayerService;
 import com.game.movies.battle.domain.service.RoundService;
+import com.game.movies.battle.domain.service.SequenceMoviesRoundService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,9 @@ public class RoundController implements RoundControllerDoc {
     private PlayerService playerService;
 
     @Autowired
+    private SequenceMoviesRoundService sequenceMoviesRoundService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @PostMapping
@@ -33,6 +37,8 @@ public class RoundController implements RoundControllerDoc {
     public RoundSaveResponseDto startRound(@RequestBody @Valid StartRoundDto startRoundDto) {
         Player playerLoad = playerService.getPlayerId(startRoundDto.getPlayerId());
         Round round = roundService.startGame(playerLoad, startRoundDto.getType(), startRoundDto.getBaseTitle());
+
+        sequenceMoviesRoundService.currentQuiz(round);
 
         RoundSaveResponseDto roundSaveResponseDto = modelMapper.map(round, RoundSaveResponseDto.class);
 
