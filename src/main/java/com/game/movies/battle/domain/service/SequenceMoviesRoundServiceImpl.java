@@ -7,6 +7,7 @@ import com.game.movies.battle.domain.dto.SequenceMoviesRoundDto;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
+import com.game.movies.battle.infrastructure.contract.SequenceMoviesRoundService;
 import com.game.movies.battle.infrastructure.dto.ImodbMovieDto;
 import com.game.movies.battle.infrastructure.dto.MovieDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 
 @Transactional
 @Service
-public class SequenceMoviesRoundService {
+public class SequenceMoviesRoundServiceImpl implements SequenceMoviesRoundService {
 
     public static final String MESSAGE_QUESTION_ID = "Não há quiz para esse código %d";
 

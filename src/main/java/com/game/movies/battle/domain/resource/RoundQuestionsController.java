@@ -6,7 +6,7 @@ import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.resource.docs.RoundQuestionsControllerDoc;
 import com.game.movies.battle.domain.service.RoundService;
-import com.game.movies.battle.domain.service.SequenceMoviesRoundService;
+import com.game.movies.battle.domain.service.SequenceMoviesRoundServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class RoundQuestionsController implements RoundQuestionsControllerDoc {
 
     @Autowired
-    private SequenceMoviesRoundService sequenceMoviesRoundService;
+    private SequenceMoviesRoundServiceImpl sequenceMoviesRoundServiceImpl;
 
     @Autowired
     private RoundService roundService;
@@ -29,11 +29,11 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
         final Round round = roundService.getRoundById(roundId);
         roundService.roundHasFinished(round);
 
-        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundService.currentQuiz(round);
+        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundServiceImpl.currentQuiz(round);
 
         final SequenceMoviesRoundDto sequenceMoviesRoundDto = modelMapper.map(sequenceMoviesRound, SequenceMoviesRoundDto.class);
 
-        sequenceMoviesRoundService.setNameMovies(sequenceMoviesRoundDto);
+        sequenceMoviesRoundServiceImpl.setNameMovies(sequenceMoviesRoundDto);
 
         return sequenceMoviesRoundDto;
     }
@@ -44,9 +44,9 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
 
         final Round currentRound = roundService.getRoundByIdAndPlayerId(roundId, answerQuestionDto.getPlayerId());
         final SequenceMoviesRound sequenceMoviesRoundCurrent =
-                sequenceMoviesRoundService.getSequenceMoviesRoundById(currentRound, questionId);
+                sequenceMoviesRoundServiceImpl.getSequenceMoviesRoundById(currentRound, questionId);
 
-        var response = sequenceMoviesRoundService.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
+        var response = sequenceMoviesRoundServiceImpl.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
         roundService.updateAttempts(currentRound, sequenceMoviesRoundCurrent.getId());
 
         return response;

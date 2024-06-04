@@ -1,5 +1,7 @@
 package com.game.movies.battle.domain.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.game.movies.battle.api.exceptionhandler.exception.EntityNotFoundException;
 import com.game.movies.battle.api.exceptionhandler.exception.ExistsGameException;
 import com.game.movies.battle.api.exceptionhandler.exception.RoundHasFinished;
@@ -7,7 +9,9 @@ import com.game.movies.battle.domain.entity.Player;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
+import com.game.movies.battle.infrastructure.dto.NextQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +27,10 @@ public class RoundService {
     @Autowired
     private RoundRepository roundRepository;
 
-    public Round startGame(Player player, String type, String baseTitle) {
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    public Round startGame(Player player, String type, String baseTitle) throws JsonProcessingException {
 
         boolean exists = roundRepository.existsByPlayerIdAndFinishedFalse(player.getId());
 

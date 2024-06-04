@@ -1,6 +1,6 @@
 package com.game.movies.battle.domain.resource;
 
-import com.game.movies.battle.domain.converters.RoundConverter;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.game.movies.battle.domain.dto.RankingResponse;
 import com.game.movies.battle.domain.dto.RoundSaveResponseDto;
 import com.game.movies.battle.domain.dto.StartRoundDto;
@@ -9,7 +9,7 @@ import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.resource.docs.RoundControllerDoc;
 import com.game.movies.battle.domain.service.PlayerService;
 import com.game.movies.battle.domain.service.RoundService;
-import com.game.movies.battle.domain.service.SequenceMoviesRoundService;
+import com.game.movies.battle.domain.service.SequenceMoviesRoundServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,18 +30,18 @@ public class RoundController implements RoundControllerDoc {
     private PlayerService playerService;
 
     @Autowired
-    private SequenceMoviesRoundService sequenceMoviesRoundService;
+    private SequenceMoviesRoundServiceImpl sequenceMoviesRoundServiceImpl;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RoundSaveResponseDto startRound(@RequestBody @Valid StartRoundDto startRoundDto) {
+    public RoundSaveResponseDto startRound(@RequestBody @Valid StartRoundDto startRoundDto) throws JsonProcessingException {
         Player playerLoad = playerService.getPlayerId(startRoundDto.getPlayerId());
         Round round = roundService.startGame(playerLoad, startRoundDto.getType(), startRoundDto.getBaseTitle());
 
-        sequenceMoviesRoundService.currentQuiz(round);
+        sequenceMoviesRoundServiceImpl.currentQuiz(round);
 
         RoundSaveResponseDto roundSaveResponseDto = modelMapper.map(round, RoundSaveResponseDto.class);
 
