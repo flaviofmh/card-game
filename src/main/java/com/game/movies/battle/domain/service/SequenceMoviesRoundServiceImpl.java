@@ -10,6 +10,7 @@ import com.game.movies.battle.domain.repository.RoundRepository;
 import com.game.movies.battle.infrastructure.contract.SequenceMoviesRoundService;
 import com.game.movies.battle.infrastructure.dto.ImodbMovieDto;
 import com.game.movies.battle.infrastructure.dto.MovieDetails;
+import com.game.movies.battle.infrastructure.message.base.NextQuestionMessageProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

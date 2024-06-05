@@ -14,7 +14,7 @@ spring:
       concurrency: 10
       ack-mode: RECORD
     consumer:
-      group-id: myGroup
+      group-id: my-game-id
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

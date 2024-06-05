@@ -2,7 +2,7 @@ package com.game.movies.battle.infrastructure.message.base;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.game.movies.battle.infrastructure.dto.NextQuestion;
+import com.game.movies.battle.domain.dto.NextQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,6 @@ public class NextQuestionMessageProducer {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        kafkaTemplate.send("create-new-question", message);
 
         kafkaTemplate.send(topic, message);
     }
