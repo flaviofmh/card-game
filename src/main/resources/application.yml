@@ -6,6 +6,26 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant-path-matcher
+  kafka:
+    topic:
+      create-new-question: create-new-question
+    bootstrap-servers: localhost:9093
+    listener:
+      concurrency: 10
+      ack-mode: RECORD
+    consumer:
+      group-id: my-game-id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      retry:
+        attempts: 5
+        delay: 5000
+    producer:
+      acks: 1
+      retries: 10
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 keys:
   apiKey: b9d5c427

@@ -5,8 +5,8 @@ import com.game.movies.battle.domain.dto.SequenceMoviesRoundDto;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.resource.docs.RoundQuestionsControllerDoc;
-import com.game.movies.battle.domain.service.RoundService;
-import com.game.movies.battle.domain.service.SequenceMoviesRoundService;
+import com.game.movies.battle.domain.service.RoundServiceImpl;
+import com.game.movies.battle.domain.service.SequenceMoviesRoundServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,24 +16,24 @@ import org.springframework.web.bind.annotation.*;
 public class RoundQuestionsController implements RoundQuestionsControllerDoc {
 
     @Autowired
-    private SequenceMoviesRoundService sequenceMoviesRoundService;
+    private SequenceMoviesRoundServiceImpl sequenceMoviesRoundServiceImpl;
 
     @Autowired
-    private RoundService roundService;
+    private RoundServiceImpl roundServiceImpl;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @GetMapping
     public SequenceMoviesRoundDto currentQuiz(@PathVariable Long roundId) {
-        final Round round = roundService.getRoundById(roundId);
-        roundService.roundHasFinished(round);
+        final Round round = roundServiceImpl.getRoundById(roundId);
+        roundServiceImpl.roundHasFinished(round);
 
-        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundService.currentQuiz(round);
+        SequenceMoviesRound sequenceMoviesRound = sequenceMoviesRoundServiceImpl.currentQuiz(round);
 
         final SequenceMoviesRoundDto sequenceMoviesRoundDto = modelMapper.map(sequenceMoviesRound, SequenceMoviesRoundDto.class);
 
-        sequenceMoviesRoundService.setNameMovies(sequenceMoviesRoundDto);
+        sequenceMoviesRoundServiceImpl.setNameMovies(sequenceMoviesRoundDto);
 
         return sequenceMoviesRoundDto;
     }
@@ -42,12 +42,12 @@ public class RoundQuestionsController implements RoundQuestionsControllerDoc {
     public SequenceMoviesRound sendAnswer(@PathVariable Long roundId, @PathVariable Long questionId,
                                              @RequestBody AnswerQuestionDto answerQuestionDto) {
 
-        final Round currentRound = roundService.getRoundByIdAndPlayerId(roundId, answerQuestionDto.getPlayerId());
+        final Round currentRound = roundServiceImpl.getRoundByIdAndPlayerId(roundId, answerQuestionDto.getPlayerId());
         final SequenceMoviesRound sequenceMoviesRoundCurrent =
-                sequenceMoviesRoundService.getSequenceMoviesRoundById(currentRound, questionId);
+                sequenceMoviesRoundServiceImpl.getSequenceMoviesRoundById(currentRound, questionId);
 
-        var response = sequenceMoviesRoundService.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
-        roundService.updateAttempts(currentRound, sequenceMoviesRoundCurrent.getId());
+        var response = sequenceMoviesRoundServiceImpl.answerQuestion(sequenceMoviesRoundCurrent, answerQuestionDto);
+        roundServiceImpl.updateAttempts(currentRound, sequenceMoviesRoundCurrent.getId());
 
         return response;
     }

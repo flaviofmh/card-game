@@ -3,10 +3,13 @@ package com.game.movies.battle.domain.service;
 import com.game.movies.battle.api.exceptionhandler.exception.EntityNotFoundException;
 import com.game.movies.battle.api.exceptionhandler.exception.ExistsGameException;
 import com.game.movies.battle.api.exceptionhandler.exception.RoundHasFinished;
+import com.game.movies.battle.domain.dto.NextQuestion;
 import com.game.movies.battle.domain.entity.Player;
 import com.game.movies.battle.domain.entity.Round;
 import com.game.movies.battle.domain.entity.SequenceMoviesRound;
 import com.game.movies.battle.domain.repository.RoundRepository;
+import com.game.movies.battle.infrastructure.contract.RoundService;
+import com.game.movies.battle.infrastructure.message.base.NextQuestionMessageProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +19,15 @@ import java.util.List;
 
 @Service
 @Transactional
-public class RoundService {
+public class RoundServiceImpl implements RoundService {
 
     public static final String MESSAGE_ROUND_ID = "Nã há um jogo em andamento de codigo %d";
 
     @Autowired
     private RoundRepository roundRepository;
+
+    @Autowired
+    private NextQuestionMessageProducer nextQuestionMessageProducer;
 
     public Round startGame(Player player, String type, String baseTitle) {
 
@@ -39,7 +45,10 @@ public class RoundService {
         round.setType(type.toLowerCase());
         round.setTitle(baseTitle.toLowerCase());
 
-        return roundRepository.save(round);
+        Round roundSaved = roundRepository.save(round);
+        nextQuestionMessageProducer.sendMessage("create-new-question", new NextQuestion(
+                "1", roundSaved.getPlayer().getId(), roundSaved.getId()));
+        return roundSaved;
     }
 
     public void stop(Long roundId) {
@@ -64,6 +73,7 @@ public class RoundService {
         return totalFinal;
     }
 
+    @Override
     public Round getRoundById(Long roundId) {
         Round round = roundRepository.findById(roundId).orElseThrow(() -> new EntityNotFoundException(
                 String.format(MESSAGE_ROUND_ID, roundId)));
